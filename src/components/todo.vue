@@ -1,25 +1,41 @@
 <template>
   <div class="form">
-    
-    <input type="text" maxlength= '80' class = 'todo-input' placeholder="Type something here..." v-model='taskTitle' @keyup.enter="addTask">
-    <button type="button" class="btn btn-primary" id ='addBtn' v-on:click="addTask">Add task</button><br>
-  <div v-for="(todo, index) in todos" :key="todo.id" class="todo-item" id='todo-block'>
+    <div class="input-block">
+      <input id = 'todo-input' class="form-control" aria-label="Text input with checkbox" type="text" maxlength= '80' placeholder="Type something here..." v-model='taskTitle' @keyup.enter="addTask">
+      <button type="button" class="btn btn-primary" id ='addBtn' v-on:click="addTask">Add new task</button>
+      </div>
+      <div v-if="!todos.length" class='emptyList'>Nothing here</div>
+  
+  <div class="output-block">
+  <div v-for="(todo, index) in todosFiltered" :key="todo.id" class="todo-item" id='todo-block'>
     <div class="card w-50">
       <div class="card-body">
         <div>
-        <div v-if="!todo.editing" class='todo-item' ><p class="card-text">{{ todo.title }}</p></div>
-        <input maxlength= '80' v-else class ='todo-item-edit' @blur="doneEdit(todo)" @keyup.enter="doneEdit(todo)" type="text" v-model='todo.title'>
+        <div v-if="!todo.editing" :class="{ completed: todo.completed }"><p class="card-text">{{ todo.title }}</p></div>
+        <div v-else><input maxlength= '80' class ='todo-item-edit' @keyup.enter="doneEdit(todo)" @keyup.esc="cancelEdit(todo)" type="text" v-model='todo.title'>
+          <span @click="doneEdit(todo)"><i title = "Save" class="fas fa-save" id = 'save-edit-icon' ></i></span>
+          <span @click="cancelEdit(todo)"><i title = "Cancel" class="fas fa-times" id = 'cancel-edit-icon' ></i></span>
+        </div>
       </div>
 
       <div class="icons">
-          <span><i title="Finish task" class="fas fa-check-square" id='checkMarkIcon'></i></span>
+          <span @click='completeTask(todo)'><i title="Finish task" class="fas fa-check-square" id='checkMarkIcon'></i></span>
           <span @click='editTask(todo)'><i title="Edit this task" class="fas fa-pencil-alt" id='editIcon'></i></span>
           <span @click='removeTask(index)'><i title="Remove this task" class="fas fa-trash-alt" id ='trashIcon' ></i></span>
       </div>
+    </div>
+  </div>
+  </div>
+  </div>
+  <div class="filter-buttons">
+    <div>
+      <button id = 'filterBtn' :class="{ active: filter == 'all' }" @click ="filter= 'all'">All</button>
+      <button id = 'filterBtn' :class="{ active: filter == 'active' }" @click ="filter= 'active'">Active</button>
+      <button id = 'filterBtn' :class="{ active: filter == 'completed' }" @click ="filter= 'completed'">Completed</button>
+    </div>
   </div>
 </div>
-    </div>
-</div>
+
 </template>
 
 <script>
@@ -29,6 +45,9 @@ export default {
     return {
       taskTitle: '',
       idForTask: 3,
+      beforeEditCache: '',
+      editMode: false,
+      filter: 'all',
       todos: [
         {
           'id': 1,
@@ -45,8 +64,32 @@ export default {
       ]
     }
   },
+  computed: {
+    todosFiltered() {
+      if(this.filter == 'all') {
+        return this.todos
+      }
+      else if(this.filter == 'active') {
+        return this.todos.filter(todo => !todo.completed)
+      }
+      else if(this.filter == 'completed') {
+        return this.todos.filter(todo => todo.completed)
+      }
+
+      return this.todos
+    }
+  },
   methods: {
     addTask() {
+      if (this.editMode == true) {
+        todo.editing = false;
+        this.editMode = false;
+      }
+
+      if(this.taskTitle.trim().length == 0) { // check empty field
+        return
+      }
+
       this.todos.push({
         id: this.idForTask,
         title: this.taskTitle,
@@ -62,11 +105,36 @@ export default {
     },
 
     editTask(todo) {
+      if(this.editMode == true) {
+        return
+      }
+      else if (todo.completed == true) {
+        return
+      }
+      this.editMode = true;
+      this.beforeEditCache = todo.title
       todo.editing = true
+
     },
 
     doneEdit(todo) {
+       if(todo.title.trim().length == 0) { // check empty field
+        return
+      }
+      this.beforeEditCache = todo.title
       todo.editing = false
+      this.editMode = false;
+    },
+
+    cancelEdit(todo) {
+      todo.title = this.beforeEditCache
+      todo.editing = false;
+      this.editMode = false;
+
+    },
+
+    completeTask(todo) {
+      todo.completed = true;
     }
   }
 }
@@ -74,17 +142,37 @@ export default {
 
 <style>
 
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400&display=swap');
+
+body {
+  font-family: 'Work Sans', sans-serif;
+}
+#addBtn {
+  font-size: 18px;
+  margin-left: 1%;
+}
+#todo-input{
+  width: 40%;
+}
 .emptyList {
+  text-align: center;
   cursor: default;
   font-size: 50px;
   color: gray;
   font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   opacity: 15%;
 }
-.form {
+
+.input-block {
   display: block;
+  display: flex;
   text-align: center;
-  margin-top: 20px;
+  align-items: center;
+  justify-content: center;
+  word-wrap: break-word;
+  overflow: hidden;
+  margin-top: 30px;
+  padding-bottom: 1%;
 }
 
 
@@ -96,13 +184,29 @@ export default {
   word-wrap: break-word;
   overflow: hidden;
   cursor: default;
+  padding-top: 1%;
+  text-align: center;
+  font-size: 18px;
 }
 
+.filter-buttons {
+  position: sticky;
+  position: absolute;
+  bottom: 10px;
+  cursor: pointer;
+  margin-top: 30%;
+  transition-duration: 0.3s;
+  color: blue;
+  position: fixed;
+  left: 50%;
+  margin: 10px 0 0 -110px;
+
+}
 .icons {
   display: block;
   letter-spacing: 25px;
   padding-left: 80%;
-  padding-top: 15px;
+  padding-top: 2%;
 }
 
 #checkMarkIcon {
@@ -142,4 +246,61 @@ export default {
   color: black;
   transition-duration: 0.5s;
 }
+
+#save-edit-icon {
+  margin-left: 2%;
+  font-size: 21px;
+  color: rgb(19, 156, 53);
+  cursor:pointer;
+  transition-duration: 0.5s;
+
+}
+#save-edit-icon:hover {
+  font-size: 21px;
+  color: green;
+  cursor:pointer;
+  transition-duration: 0.5s;
+
+}
+#cancel-edit-icon {
+  margin-left: 1.5%;
+  font-size: 21px;
+  color: tomato;
+  cursor:pointer;
+  transition-duration: 0.5s;
+}
+#cancel-edit-icon:hover {
+  font-size: 21px;
+  color: red;
+  cursor:pointer;
+  transition-duration: 0.5s;
+}
+
+.completed {
+  text-decoration: line-through;
+  color: gray;
+  transition-duration: 0.8s;
+
+}
+.active {
+  background: rgb(19, 156, 53);
+  color: white;
+}
+
+#filterBtn {
+  border: none;
+  outline: none;
+  transition-duration: 0.5s;
+}
+
+#filterBtn:hover {
+  background-color: rgb(19, 156, 53);
+  transition-duration: 0.5s;
+  color: white;
+}
+
+#filterBtn:active {
+  background-color: rgb(19, 64, 30);
+}
+
 </style>
