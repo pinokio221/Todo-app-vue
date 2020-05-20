@@ -1,3 +1,4 @@
+
 <template>
   <div class="form">
     <div class="input-block">
@@ -5,28 +6,13 @@
       <button type="button" class="btn btn-primary" id ='addBtn' v-on:click="addTask">Add new task</button>
       </div>
       <div v-if="!todos.length" class='emptyList'>Nothing here</div>
-  
-  <div class="output-block">
-  <div v-for="(todo, index) in todosFiltered" :key="todo.id" class="todo-item" id='todo-block'>
-    <div class="card w-50">
-      <div class="card-body">
-        <div>
-        <div v-if="!todo.editing" :class="{ completed: todo.completed }"><p class="card-text">{{ todo.title }}</p></div>
-        <div v-else><input maxlength= '80' class ='todo-item-edit' @keyup.enter="doneEdit(todo)" @keyup.esc="cancelEdit(todo)" type="text" v-model='todo.title'>
-          <span @click="doneEdit(todo)"><i title = "Save" class="fas fa-save" id = 'save-edit-icon' ></i></span>
-          <span @click="cancelEdit(todo)"><i title = "Cancel" class="fas fa-times" id = 'cancel-edit-icon' ></i></span>
-        </div>
-      </div>
 
-      <div class="icons">
-          <span @click='completeTask(todo)'><i title="Finish task" class="fas fa-check-square" id='checkMarkIcon'></i></span>
-          <span @click='editTask(todo)'><i title="Edit this task" class="fas fa-pencil-alt" id='editIcon'></i></span>
-          <span @click='removeTask(index)'><i title="Remove this task" class="fas fa-trash-alt" id ='trashIcon' ></i></span>
-      </div>
-    </div>
+  <div class="output-block">
+  <transition-group name='fade' enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
+  <todo-item v-for="(todo, index) in todosFiltered" :key="todo.id" :todo="todo" :index="index" id='todo-block' @removedTask='removeTask' @finishedEdit='finishedEdit' @completedTask='completedTask'></todo-item>
+    </transition-group>
   </div>
-  </div>
-  </div>
+
   <div class="filter-buttons">
     <div>
       <button id = 'filterBtn' :class="{ active: filter == 'all' }" @click ="filter= 'all'">All</button>
@@ -39,28 +25,20 @@
 </template>
 
 <script>
+import TodoItem from './TodoItem.vue'
+
 export default {
   name: 'todo',
+  components: {
+    TodoItem,
+  },
   data () {
     return {
       taskTitle: '',
-      idForTask: 3,
+      idForTask: 0,
       beforeEditCache: '',
-      editMode: false,
       filter: 'all',
       todos: [
-        {
-          'id': 1,
-          'title': 'some',
-          'completed': false,
-          'editing': false,
-        },
-        {
-          'id': 2,
-          'title': 'two',
-          'completed': false,
-          'editing': false,
-        },
       ]
     }
   },
@@ -81,11 +59,6 @@ export default {
   },
   methods: {
     addTask() {
-      if (this.editMode == true) {
-        todo.editing = false;
-        this.editMode = false;
-      }
-
       if(this.taskTitle.trim().length == 0) { // check empty field
         return
       }
@@ -103,38 +76,11 @@ export default {
     removeTask(index) {
       this.todos.splice(index, 1)
     },
-
-    editTask(todo) {
-      if(this.editMode == true) {
-        return
-      }
-      else if (todo.completed == true) {
-        return
-      }
-      this.editMode = true;
-      this.beforeEditCache = todo.title
-      todo.editing = true
-
+    finishedEdit(data) {
+      this.todos.splice(data.index, 1, data.todo)
     },
-
-    doneEdit(todo) {
-       if(todo.title.trim().length == 0) { // check empty field
-        return
-      }
-      this.beforeEditCache = todo.title
-      todo.editing = false
-      this.editMode = false;
-    },
-
-    cancelEdit(todo) {
-      todo.title = this.beforeEditCache
-      todo.editing = false;
-      this.editMode = false;
-
-    },
-
-    completeTask(todo) {
-      todo.completed = true;
+    completedTask(data) {
+      this.todos.splice(data.index, 1, data.todo)
     }
   }
 }
@@ -143,6 +89,7 @@ export default {
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css');
 
 body {
   font-family: 'Work Sans', sans-serif;
@@ -187,23 +134,24 @@ body {
   padding-top: 1%;
   text-align: center;
   font-size: 18px;
+  animation-duration: 0.3s;
 }
 
 .filter-buttons {
   position: sticky;
   position: absolute;
-  bottom: 10px;
+  bottom: 80%;
+  left: 5%;
   cursor: pointer;
   margin-top: 30%;
   transition-duration: 0.3s;
   color: blue;
   position: fixed;
-  left: 50%;
-  margin: 10px 0 0 -110px;
 
 }
 .icons {
   display: block;
+  position: inherit;
   letter-spacing: 25px;
   padding-left: 80%;
   padding-top: 2%;
@@ -304,3 +252,4 @@ body {
 }
 
 </style>
+
