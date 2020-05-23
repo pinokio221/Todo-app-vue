@@ -43,7 +43,7 @@ export default {
 
     methods: {
         removeTask(index) {
-            this.$emit('removedTask', index)
+            eventBus.$emit('removedTask', index)
         },
         editTask() {
             this.editing = true
@@ -56,7 +56,7 @@ export default {
             }
             this.beforeEditCache = this.title
             this.editing = false
-            this.$emit('finishedEdit', {
+            eventBus.$emit('finishedEdit', {
                 'index': this.index,
                 'todo': {
                     'id': this.id,
@@ -75,7 +75,7 @@ export default {
         completeTask() {
             this.completed = true;
             this.editing = false;
-            this.$emit('completedTask', {
+            eventBus.$emit('completedTask', {
                 'index': this.index,
                 'todo': {
                     'id': this.id,

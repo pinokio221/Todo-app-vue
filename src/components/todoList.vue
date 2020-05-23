@@ -9,16 +9,12 @@
 
   <div class="output-block">
   <transition-group name='fade' enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
-  <todo-item v-for="(todo, index) in todosFiltered" :key="todo.id" :todo="todo" :index="index" id='todo-block' @removedTask='removeTask' @finishedEdit='finishedEdit' @completedTask='completedTask'></todo-item>
+  <todo-item v-for="(todo, index) in todosFiltered" :key="todo.id" :todo="todo" :index="index" id='todo-block'></todo-item>
     </transition-group>
   </div>
 
   <div class="filter-buttons">
-    <div>
-      <button id = 'filterBtn' :class="{ active: filter == 'all' }" @click ="filter= 'all'">All</button>
-      <button id = 'filterBtn' :class="{ active: filter == 'active' }" @click ="filter= 'active'">Active</button>
-      <button id = 'filterBtn' :class="{ active: filter == 'completed' }" @click ="filter= 'completed'">Completed</button>
-    </div>
+    <todo-filtered></todo-filtered>
   </div>
 </div>
 
@@ -26,22 +22,31 @@
 
 <script>
 import TodoItem from './TodoItem.vue'
+import TodoFiltered from './TodoFiltered'
 
 export default {
   name: 'todo',
   components: {
     TodoItem,
+    TodoFiltered,
   },
   data () {
     return {
       taskTitle: '',
       idForTask: 0,
-      beforeEditCache: '',
       filter: 'all',
+      beforeEditCache: '',
       todos: [
       ]
     }
   },
+  created() {
+    eventBus.$on('removedTask', (index) => this.removeTask(index))
+    eventBus.$on('finishedEdit', (data) => this.finishedEdit(data))
+    eventBus.$on('completedTask', (data) => this.completedTask(data))
+    eventBus.$on('filterChanged', (filter) => this.filterChanged(filter))
+  },
+
   computed: {
     todosFiltered() {
       if(this.filter == 'all') {
@@ -81,6 +86,9 @@ export default {
     },
     completedTask(data) {
       this.todos.splice(data.index, 1, data.todo)
+    },
+    filterChanged(filter) {
+      this.filter = filter
     }
   }
 }
