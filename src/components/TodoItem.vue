@@ -42,8 +42,8 @@ export default {
     },
 
     methods: {
-        removeTask(index) {
-            eventBus.$emit('removedTask', index)
+        removeTask(id) {
+            this.$store.dispatch('removedTask', id)
         },
         editTask() {
             this.editing = true
@@ -56,15 +56,13 @@ export default {
             }
             this.beforeEditCache = this.title
             this.editing = false
-            eventBus.$emit('finishedEdit', {
-                'index': this.index,
-                'todo': {
-                    'id': this.id,
-                    'title': this.title,
-                    'completed': this.completed,
-                    'editing': this.editing,
-                }
+            this.$store.dispatch('changedTask', {
+                'id': this.id,
+                'title': this.title,
+                'completed': this.completed,
+                'editing': this.editing,
             })
+                
         },
 
         cancelEdit() {
@@ -75,14 +73,11 @@ export default {
         completeTask() {
             this.completed = true;
             this.editing = false;
-            eventBus.$emit('completedTask', {
-                'index': this.index,
-                'todo': {
-                    'id': this.id,
-                    'title': this.title,
-                    'completed': this.completed,
-                    'editing': this.editing,
-                }
+            this.$store.dispatch('completeTask', {
+                'id': this.id,
+                'title': this.title,
+                'completed': this.completed,
+                'editing': this.editing,
             })
     },
 

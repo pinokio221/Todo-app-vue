@@ -5,11 +5,12 @@
       <input id = 'todo-input' class="form-control" aria-label="Text input with checkbox" type="text" maxlength= '80' placeholder="Type something here..." v-model='taskTitle' @keyup.enter="addTask">
       <button type="button" class="btn btn-primary" id ='addBtn' v-on:click="addTask">Add new task</button>
       </div>
-      <div v-if="!todos.length" class='emptyList'>Nothing here</div>
-
   <div class="output-block">
+  <div v-if="!todosFiltered.length" class='emptyList'>Nothing here</div> 
   <transition-group name='fade' enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
   <todo-item v-for="(todo, index) in todosFiltered" :key="todo.id" :todo="todo" :index="index" id='todo-block'></todo-item>
+
+
     </transition-group>
   </div>
 
@@ -34,32 +35,11 @@ export default {
     return {
       taskTitle: '',
       idForTask: 0,
-      filter: 'all',
-      beforeEditCache: '',
-      todos: [
-      ]
     }
   },
-  created() {
-    eventBus.$on('removedTask', (index) => this.removeTask(index))
-    eventBus.$on('finishedEdit', (data) => this.finishedEdit(data))
-    eventBus.$on('completedTask', (data) => this.completedTask(data))
-    eventBus.$on('filterChanged', (filter) => this.filterChanged(filter))
-  },
-
   computed: {
     todosFiltered() {
-      if(this.filter == 'all') {
-        return this.todos
-      }
-      else if(this.filter == 'active') {
-        return this.todos.filter(todo => !todo.completed)
-      }
-      else if(this.filter == 'completed') {
-        return this.todos.filter(todo => todo.completed)
-      }
-
-      return this.todos
+      return this.$store.getters.todosFiltered
     }
   },
   methods: {
@@ -67,29 +47,14 @@ export default {
       if(this.taskTitle.trim().length == 0) { // check empty field
         return
       }
-
-      this.todos.push({
+      this.$store.dispatch('addTodo', {
         id: this.idForTask,
         title: this.taskTitle,
-        completed: false,
-        editing: false,
       })
 
       this.taskTitle = ''
       this.idForTask++
     },
-    removeTask(index) {
-      this.todos.splice(index, 1)
-    },
-    finishedEdit(data) {
-      this.todos.splice(data.index, 1, data.todo)
-    },
-    completedTask(data) {
-      this.todos.splice(data.index, 1, data.todo)
-    },
-    filterChanged(filter) {
-      this.filter = filter
-    }
   }
 }
 </script>
