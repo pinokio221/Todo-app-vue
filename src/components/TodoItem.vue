@@ -11,7 +11,7 @@
     <div class="icons">
         <span v-if="!completed" @click='completeTask()'><i title="Finish task" class="fas fa-check" id='checkMarkIcon'></i></span>
         <span v-if="!completed" @click='editTask()'><i title="Edit this task" class="fas fa-pencil-alt" id='editIcon'></i></span>
-        <span v-if="!completed" @click='removeTask(index)'><i title="Remove this task" class="fas fa-trash-alt" id ='trashIcon' ></i></span>
+        <span v-if="!completed" @click='removeTask(id)'><i title="Remove this task" class="fas fa-trash-alt" id ='trashIcon' ></i></span>
     </div>
     </div>
 </div></div>

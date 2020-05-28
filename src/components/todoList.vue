@@ -6,17 +6,15 @@
       <button type="button" class="btn btn-primary" id ='addBtn' v-on:click="addTask">Add new task</button>
       </div>
   <div class="output-block">
-  <div v-if="!todosFiltered.length" class='emptyList'>Nothing here</div> 
+  <div v-if="!todosFiltered.length" class='emptyList'>Nothing here</div>
+    <div class="filter-buttons">
+      <todo-filtered></todo-filtered>
+    </div>
   <transition-group name='fade' enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
   <todo-item v-for="(todo, index) in todosFiltered" :key="todo.id" :todo="todo" :index="index" id='todo-block'></todo-item>
-
-
     </transition-group>
   </div>
 
-  <div class="filter-buttons">
-    <todo-filtered></todo-filtered>
-  </div>
 </div>
 
 </template>
@@ -36,6 +34,9 @@ export default {
       taskTitle: '',
       idForTask: 0,
     }
+  },
+  created () {
+    this.$store.dispatch('retrieveTodos')
   },
   computed: {
     todosFiltered() {
@@ -75,7 +76,12 @@ body {
   width: 40%;
 }
 .emptyList {
-  text-align: center;
+  position: absolute; 
+  left: 0; 
+  right: 0; 
+  margin-left: auto; 
+  margin-right: auto;
+  width: 30%; /* Need a specific value to work */
   cursor: default;
   font-size: 50px;
   color: gray;
@@ -84,7 +90,6 @@ body {
 }
 
 .input-block {
-  display: block;
   display: flex;
   text-align: center;
   align-items: center;
@@ -110,17 +115,37 @@ body {
   animation-duration: 0.3s;
 }
 
-.filter-buttons {
-  position: sticky;
+.todo-filtered, ul {
+  display: flex;
+  list-style: none;
+  text-transform: uppercase;
+  text-decoration: none;
   position: absolute;
-  bottom: 80%;
-  left: 5%;
+  left: 1%;
   cursor: pointer;
-  margin-top: 30%;
   transition-duration: 0.3s;
   color: blue;
-  position: fixed;
+  text-align: center;
 
+
+}
+li {
+  padding: 3px;
+}
+@media screen and (max-width: 1300px) {
+  .todo-filtered ul {
+    flex-direction: column;
+    align-self: center;
+  }
+  .todo-filtered ul li {
+    margin: 5px;
+  }
+}
+  @media screen and (max-width: 800px) {
+  .todo-filtered ul{
+    left: 0;
+    text-align: left;
+  }
 }
 .icons {
   display: block;
@@ -202,26 +227,6 @@ body {
   color: gray;
   transition-duration: 0.8s;
 
-}
-.active {
-  background: rgb(19, 156, 53);
-  color: white;
-}
-
-#filterBtn {
-  border: none;
-  outline: none;
-  transition-duration: 0.5s;
-}
-
-#filterBtn:hover {
-  background-color: rgb(19, 156, 53);
-  transition-duration: 0.5s;
-  color: white;
-}
-
-#filterBtn:active {
-  background-color: rgb(19, 64, 30);
 }
 
 </style>

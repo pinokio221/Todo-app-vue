@@ -1,8 +1,9 @@
 <template>
 <div class='todo-filtered'>
-    <button id = 'filterBtn' :class="{ active: filter == 'all' }" @click = "changeFilter('all')">All</button>
-    <button id = 'filterBtn' :class="{ active: filter == 'active' }" @click = "changeFilter('active')">Active</button>
-    <button id = 'filterBtn' :class="{ active: filter == 'completed' }" @click = "changeFilter('completed')">Completed</button>
+    <ul>
+     <li><b-button  :class="{ active: filter == 'all' }" @click = "changeFilter('all')">All</b-button></li>
+     <li><b-button  :class="{ active: filter == 'active' }" @click = "changeFilter('active')">Active</b-button></li>
+     <li><b-button  :class="{ active: filter == 'completed' }" @click = "changeFilter('completed')">Completed</b-button></li></ul>
     </div>
 </template>
 
@@ -22,3 +23,4 @@ export default {
 
 }
 </script>
+

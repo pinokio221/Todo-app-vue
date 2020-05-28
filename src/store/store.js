@@ -1,7 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from 'axios'
 
 Vue.use(Vuex)
+
+axios.defaults.baseURL = 'http://todo_laravel.test:8003/api'
 
 export const store = new Vuex.Store( {
   state: {
@@ -25,21 +28,26 @@ export const store = new Vuex.Store( {
   },
 
   mutations: {
-      addTodo(state, todo) {
-          state.todos.push({
-              id: todo.id,
-              title: todo.title,
-              completed: false,
-              editing: false
-          })
-      },
+    
+    retrieveTodos(state, todos) {
+      state.todos = todos;
+    },
+    
+    addTodo(state, todo) {
+        state.todos.push({
+            id: todo.id,
+            title: todo.title,
+            completed: false,
+            editing: false
+        })
+    },
 
     updateFilter(state, filter) {
       state.filter = filter
     }, 
 
     removedTask(state, id) {
-      const index = state.todos.findIndex(item => item.id == this.id)
+      const index = state.todos.findIndex(item => item.id == id)
       state.todos.splice(index, 1)
     },
 
@@ -65,8 +73,27 @@ export const store = new Vuex.Store( {
 
   },
   actions: {
+    retrieveTodos(context) {
+      axios.get('/todos') // axios get request here
+          .then(response => {
+            context.commit('retrieveTodos', response.data)
+          })
+          .catch(error => {
+            console.log(error);
+          }) 
+    },
+
     addTodo(context, todo) {
-      context.commit('addTodo', todo)
+      axios.post('/todos', {
+        title: todo.title,
+        completed: false
+      }) // axios get request here
+          .then(response => {
+            context.commit('addTodo', response.data)
+          })
+          .catch(error => {
+            console.log(error);
+          }) 
   },
 
     updateFilter(context, filter) {
@@ -75,17 +102,40 @@ export const store = new Vuex.Store( {
     }, 
 
     removedTask(context, id) {
-      context.commit('removedTask', id)
-
+      axios.delete('/todos/' + id) 
+      // axios get request here
+          .then(response => {
+            context.commit('removedTask', id)
+          })
+          .catch(error => {
+            console.log(error);
+          }) 
     },
 
     changedTask(context, todo) {
-      context.commit('changedTask', todo)
+      axios.patch('/todos/' + todo.id, {
+        title: todo.title,
+        completed: todo.completed
+      }) // axios get request here
+          .then(response => {
+            context.commit('changedTask', response.data)
+          })
+          .catch(error => {
+            console.log(error);
+          }) 
 
     },
 
     completeTask(context, todo) {
-      context.commit('completeTask', todo)
+      axios.patch('/todos/' + todo.id, {
+        completed: true
+      }) // axios get request here
+          .then(response => {
+            context.commit('completeTask', response.data)
+          })
+          .catch(error => {
+            console.log(error);
+          }) 
       }
     }
 
